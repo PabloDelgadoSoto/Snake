@@ -16,10 +16,13 @@ const movimientos ={
 }
 const opciones = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-const tablero = 50;
+const tablero = 10;
 const turnos = tablero/2;
 var contFruta = tablero/2;
 var serpiente = [];
+var direccion = 'ArrowRight';
+var intervalo;
+var velocidad = 500;
 
 window.onload = function () {
     table = document.getElementById('table');
@@ -39,13 +42,20 @@ const hacerTabla = function () {
     }
     pintarSerpiente(colorSerpiente);
     document.addEventListener('keydown', function(event){
-        inArray(opciones, event.key)?moverCabeza(event.key):'';
+        inArray(opciones, event.key)?cambiarDirección(event.key):'';
     })
+    intervalo = setInterval(() => {
+        moverCabeza();
+    }, velocidad);
 };
 
-const moverCabeza = function(tecla){
+const cambiarDirección = function(tecla){
+    direccion = tecla;
+}
+
+const moverCabeza = function(){
     let marca = serpiente[0].split('-');
-    marca[movimientos[tecla][0]] = parseInt(marca[movimientos[tecla][0]]) + parseInt(movimientos[tecla][1]);
+    marca[movimientos[direccion][0]] = parseInt(marca[movimientos[direccion][0]]) + parseInt(movimientos[direccion][1]);
     marca[0] = desbordar(marca[0]);
     marca[1] = desbordar(marca[1]);
     let suma = marca[0]+'-'+marca[1];
@@ -99,6 +109,11 @@ const crearFruta = function(){
 
 const comer = function(cabeza){
     if(inArray(fruta, cabeza)){
+        clearInterval(intervalo);
+        velocidad -= 30;
+        intervalo = setInterval(() => {
+            moverCabeza();
+        }, velocidad);
         comida = true;
     }
 }
