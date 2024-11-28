@@ -1,28 +1,30 @@
 let table;
 let cabeza;
-var fruta = [];
+let fruta = [];
 
-var comida = false;
+let comida = false;
 
-var colorSerpiente = 'background-color:green';
-var colorFruta = 'background-color:red';
-var colorFondo = 'background-color:blue';
+let imagenCabeza = "background-image:url(cabeza.jpg);background-size:100% 100%;";
+let imagenCola = "background-image:url(cola.jpg);background-size:100% 100%;";
+let colorSerpiente = 'background-color:green';
+let colorFruta = 'background-image:url(fruta.jpg);background-size:100% 100%;';
+let colorFondo = 'background-color:blue';
 
-const movimientos ={
-    'ArrowUp':[0,-1],
-    'ArrowDown':[0,1],
-    'ArrowLeft':[1,-1],
-    'ArrowRight':[1,1]
+const movimientos = {
+    'ArrowUp': [0, -1, "transform: scaleY(-1);rotate: 90deg;", "transform:scaleX(-1);rotate:270deg"],
+    'ArrowDown': [0, 1, "transform: scaleY(-1);rotate: 270deg;", "transform:scaleX(-1);rotate:90deg;"],
+    'ArrowLeft': [1, -1, "", "transform:scaleX(1);"],
+    'ArrowRight': [1, 1, "transform: scaleY(-1);rotate: 180deg;", "transform: scaleX(-1);"]
 }
 const opciones = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
 const tablero = 10;
-const turnos = tablero/2;
-var contFruta = tablero/2;
-var serpiente = [];
-var direccion = 'ArrowRight';
-var intervalo;
-var velocidad = 500;
+const turnos = tablero / 2;
+let contFruta = tablero / 2;
+let serpiente = [];
+let direccion = 'ArrowRight';
+let intervalo;
+let velocidad = 500;
 
 window.onload = function () {
     table = document.getElementById('table');
@@ -38,67 +40,72 @@ const hacerTabla = function () {
             tr.appendChild(td);
         }
         table.appendChild(tr);
-        serpiente = [tablero/2+'-'+tablero/2, tablero/2+'-'+(tablero/2-1), tablero/2+'-'+(tablero/2-2)];
+        serpiente = [tablero / 2 + '-' + tablero / 2, tablero / 2 + '-' + (tablero / 2 - 1), tablero / 2 + '-' + (tablero / 2 - 2)];
     }
     pintarSerpiente(colorSerpiente);
-    document.addEventListener('keydown', function(event){
-        inArray(opciones, event.key)?cambiarDirección(event.key):'';
+    document.addEventListener('keydown', function (event) {
+        inArray(opciones, event.key) ? cambiarDirección(event.key) : '';
     })
     intervalo = setInterval(() => {
         moverCabeza();
     }, velocidad);
 };
 
-const cambiarDirección = function(tecla){
+const cambiarDirección = function (tecla) {
     direccion = tecla;
 }
 
-const moverCabeza = function(){
+const moverCabeza = function () {
     let marca = serpiente[0].split('-');
     marca[movimientos[direccion][0]] = parseInt(marca[movimientos[direccion][0]]) + parseInt(movimientos[direccion][1]);
     marca[0] = desbordar(marca[0]);
     marca[1] = desbordar(marca[1]);
-    let suma = marca[0]+'-'+marca[1];
+    let suma = marca[0] + '-' + marca[1];
     pintarSerpiente(colorFondo);
     moverCuerpo();
     serpiente[0] = suma;
     comer(serpiente[0]);
-    if(contFruta == turnos){
+    if (contFruta == turnos) {
         crearFruta();
     }
     pintarSerpiente(colorSerpiente);
     contFruta++;
-    if(perder(serpiente, serpiente[0])){
+    if (perder(serpiente, serpiente[0])) {
         rehacer();
     }
 }
 
-const moverCuerpo = function(){
+const moverCuerpo = function () {
     let guardar = [];
     serpiente.push();
     serpiente.forEach(parte => {
         guardar.push(parte);
     });
-    for(let i = 1; i < serpiente.length; i++){
-        serpiente[i] = guardar[i-1];
+    for (let i = 1; i < serpiente.length; i++) {
+        serpiente[i] = guardar[i - 1];
     }
-    if(comida){
-        serpiente.push(guardar[serpiente.length-1]);
+    if (comida) {
+        serpiente.push(guardar[serpiente.length - 1]);
         comida = false;
     }
 }
 
-const pintarSerpiente = function(color){
+const pintarSerpiente = function (color) {
     serpiente.forEach(parte => {
         let e = document.getElementById(parte);
         e.setAttribute('style', color);
     });
-    
+    if (color == colorSerpiente) {
+        let e = document.getElementById(serpiente[0]);
+        e.setAttribute('style', imagenCabeza + movimientos[direccion][2]);
+        e = document.getElementById(serpiente[serpiente.length - 1]);
+        e.setAttribute('style', imagenCola + verSiguiente(serpiente.length - 1));
+    }
 }
 
-const crearFruta = function(){
-    let id = Math.floor(Math.random()*tablero)+'-'+Math.floor(Math.random()*tablero);
-    if(inArray(serpiente, id)){
+const crearFruta = function () {
+    let id = Math.floor(Math.random() * tablero) + '-' + Math.floor(Math.random() * tablero);
+    if (inArray(serpiente, id)) {
         crearFruta();
     }
     let f = document.getElementById(id);
@@ -107,13 +114,16 @@ const crearFruta = function(){
     contFruta = 0;
 }
 
-const comer = function(cabeza){
-    if(inArray(fruta, cabeza)){
+const comer = function (cabeza) {
+    if (inArray(fruta, cabeza)) {
+        //turbo
+        /*
         clearInterval(intervalo);
         velocidad -= 30;
         intervalo = setInterval(() => {
             moverCabeza();
         }, velocidad);
+        */
         comida = true;
     }
 }
@@ -134,16 +144,34 @@ const inArray = function (arr, e) {
     return false;
 };
 
-const perder = function(arr, e){
+const perder = function (arr, e) {
     for (let i = 1; i < arr.length; i++) {
         if (arr[i] == e) return true;
     }
     return false;
 }
 
-const rehacer = function(){
+const rehacer = function () {
     while (table.firstChild) {
         table.removeChild(table.firstChild);
     }
+    clearInterval(intervalo);
     document.write('Perdiste, recarga la página para volver a comenzar');
+}
+
+function verSiguiente(num) {
+    let mov = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    let s = serpiente[num].split("-");
+    let base0 = s[0];
+    let base1 = s[1];
+    for (let j = 0; j < 4; j++) {
+        s[0] = base0;
+        s[1] = base1;
+        s[movimientos[mov[j]][0]] = parseInt(s[movimientos[mov[j]][0]]) + parseInt(movimientos[mov[j]][1]);
+        let marca = desbordar(s[0])+'-'+desbordar(s[1]);
+        if (marca == serpiente[num - 1]) {
+            return movimientos[mov[j]][3];
+        }
+    };
+    return "";
 }
