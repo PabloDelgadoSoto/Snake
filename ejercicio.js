@@ -206,3 +206,13 @@ function pintarCurva(num) {
     };
     return sitio[donde];
 }
+
+
+
+
+//up down       -
+//left right
+//up left       -
+//down left     -
+//down right    -
+//up right      -
