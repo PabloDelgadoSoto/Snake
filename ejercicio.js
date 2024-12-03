@@ -6,7 +6,7 @@ let comida = false;
 
 let imagenCabeza = "background-image:url(cabeza.jpg);background-size:100% 100%;";
 let imagenCola = "background-image:url(cola.jpg);background-size:100% 100%;";
-let colorSerpiente = 'background-color:green';
+let colorSerpiente = 'background-image:url(recta.jpg);background-size:100% 100%;';
 let colorFruta = 'background-image:url(fruta.jpg);background-size:100% 100%;';
 let colorFondo = 'background-color:blue';
 
@@ -61,14 +61,14 @@ const moverCabeza = function () {
     marca[0] = desbordar(marca[0]);
     marca[1] = desbordar(marca[1]);
     let suma = marca[0] + '-' + marca[1];
-    pintarSerpiente(colorFondo);
+    pintarAzul();
     moverCuerpo();
     serpiente[0] = suma;
     comer(serpiente[0]);
     if (contFruta == turnos) {
         crearFruta();
     }
-    pintarSerpiente(colorSerpiente);
+    pintarSerpiente();
     contFruta++;
     if (perder(serpiente, serpiente[0])) {
         rehacer();
@@ -90,17 +90,22 @@ const moverCuerpo = function () {
     }
 }
 
-const pintarSerpiente = function (color) {
+const pintarAzul = function (){
     serpiente.forEach(parte => {
         let e = document.getElementById(parte);
-        e.setAttribute('style', color);
+        e.setAttribute('style', colorFondo);
     });
-    if (color == colorSerpiente) {
-        let e = document.getElementById(serpiente[0]);
-        e.setAttribute('style', imagenCabeza + movimientos[direccion][2]);
-        e = document.getElementById(serpiente[serpiente.length - 1]);
-        e.setAttribute('style', imagenCola + verSiguiente(serpiente.length - 1));
+}
+
+const pintarSerpiente = function () {
+    for(let i=1;i<serpiente.length-1;i++){
+        let e = document.getElementById(serpiente[i]);
+        e.setAttribute('style', pintarCurva(i));
     }
+    let e = document.getElementById(serpiente[0]);
+    e.setAttribute('style', imagenCabeza + movimientos[direccion][2]);
+    e = document.getElementById(serpiente[serpiente.length - 1]);
+    e.setAttribute('style', imagenCola + verSiguiente(serpiente.length - 1));
 }
 
 const crearFruta = function () {
@@ -174,4 +179,30 @@ function verSiguiente(num) {
         }
     };
     return "";
+}
+
+function pintarCurva(num) {
+    const sitio ={
+        "ArrowUpArrowDown":'background-image:url(recta.png);background-size:100% 100%;rotate: 270deg;',
+        "ArrowUpArrowLeft":'background-image:url(curva.png);background-size:100% 100%;rotate: 270deg;',
+        "ArrowUpArrowRight":'background-image:url(curva.png);background-size:100% 100%;',
+        "ArrowDownArrowLeft":'background-image:url(curva.png);background-size:100% 100%;rotate: 180deg;',
+        "ArrowDownArrowRight":'background-image:url(curva.png);background-size:100% 100%;rotate: 90deg;',
+        "ArrowLeftArrowRight":'background-image:url(recta.png);background-size:100% 100%;'
+    }
+    let mov = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    let donde = "";
+    let s = serpiente[num].split("-");
+    let base0 = s[0];
+    let base1 = s[1];
+    for (let j = 0; j < 4; j++) {
+        s[0] = base0;
+        s[1] = base1;
+        s[movimientos[mov[j]][0]] = parseInt(s[movimientos[mov[j]][0]]) + parseInt(movimientos[mov[j]][1]);
+        let marca = desbordar(s[0])+'-'+desbordar(s[1]);
+        if (marca == serpiente[num - 1] || marca == serpiente[num+1]) {
+            donde += mov[j];
+        }
+    };
+    return sitio[donde];
 }
